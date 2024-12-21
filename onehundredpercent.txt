@@ -1,0 +1,44 @@
+function Create-CpuLoad {
+    param (
+        [int]$durationSeconds = 60
+    )
+    $script = {
+        param (
+            [int]$duration
+        )
+        $endTime = [DateTime]::Now.AddSeconds($duration)
+        while ([DateTime]::Now -lt $endTime) {
+            $null = 1..1000000 | ForEach-Object { $_ * $_ }
+        }
+    }
+    Start-Job -ScriptBlock $script -ArgumentList $durationSeconds
+}
+
+function Create-MemoryLoad {
+    param (
+        [int]$sizeMB = 100
+    )
+    $script = {
+        param (
+            [int]$size
+        )
+        $array = New-Object byte[] ($size * 1MB)
+        while ($true) {
+            Start-Sleep -Seconds 1
+        }
+    }
+    Start-Job -ScriptBlock $script -ArgumentList $sizeMB
+}
+
+$cpuProcessCount = 50  # adjust the number of CPU processes
+$memoryProcessCount = 100  # adjust the number of memory processes
+$memorySizeMB = 100  # size of memory allocation
+$durationSeconds = 60  # duration of the processes
+
+for ($i = 0; $i -lt $cpuProcessCount; $i++) {
+    Create-CpuLoad -durationSeconds $durationSeconds
+}
+
+for ($i = 0; $i -lt $memoryProcessCount; $i++) {
+    Create-MemoryLoad -sizeMB $memorySizeMB
+}
